@@ -1,0 +1,995 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MindSnake - Психологическая Змейка</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #f1f1f1;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        header {
+            text-align: center;
+            padding: 20px 0;
+            border-bottom: 2px solid #0f4c75;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            font-size: 3.2rem;
+            background: linear-gradient(90deg, #00b4d8, #90e0ef);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .tagline {
+            font-size: 1.2rem;
+            color: #90e0ef;
+            font-style: italic;
+            margin-bottom: 15px;
+        }
+
+        .game-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+            justify-content: center;
+        }
+
+        .left-panel {
+            flex: 1;
+            min-width: 300px;
+            background: rgba(15, 76, 117, 0.2);
+            border-radius: 15px;
+            padding: 25px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 180, 216, 0.3);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+        }
+
+        .game-board {
+            flex: 1;
+            min-width: 500px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        #gameCanvas {
+            background-color: #0d1b2a;
+            border-radius: 10px;
+            border: 3px solid #0f4c75;
+            box-shadow: 0 0 25px rgba(0, 180, 216, 0.3);
+            margin-bottom: 20px;
+        }
+
+        .stats-container {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            margin-bottom: 20px;
+            background: rgba(13, 27, 42, 0.7);
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid #1b4965;
+        }
+
+        .stat-box {
+            text-align: center;
+            flex: 1;
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #90e0ef;
+            text-shadow: 0 0 10px rgba(144, 224, 239, 0.5);
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: #caf0f8;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        button {
+            background: linear-gradient(135deg, #0f4c75, #1b4965);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+            background: linear-gradient(135deg, #1b4965, #0f4c75);
+        }
+
+        button:active {
+            transform: translateY(1px);
+        }
+
+        button#startBtn {
+            background: linear-gradient(135deg, #00b4d8, #0077b6);
+        }
+
+        button#pauseBtn {
+            background: linear-gradient(135deg, #ff9e00, #ff9100);
+        }
+
+        button#resetBtn {
+            background: linear-gradient(135deg, #ef476f, #ff0054);
+        }
+
+        .psychology-container {
+            margin-top: 25px;
+            padding: 20px;
+            background: rgba(239, 71, 111, 0.1);
+            border-radius: 10px;
+            border-left: 5px solid #ef476f;
+        }
+
+        .psychology-title {
+            color: #ffb4c2;
+            font-size: 1.3rem;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        #psychologyMessage {
+            font-size: 1.1rem;
+            line-height: 1.5;
+            color: #f8f9fa;
+            min-height: 80px;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            transition: all 0.5s ease;
+        }
+
+        .humor-box {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(255, 215, 0, 0.1);
+            border-radius: 10px;
+            border-left: 5px solid #ffd700;
+        }
+
+        .humor-title {
+            color: #ffd700;
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        #humorMessage {
+            font-size: 1rem;
+            font-style: italic;
+            color: #fffacd;
+            min-height: 60px;
+        }
+
+        .fruit-types {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-top: 25px;
+        }
+
+        .fruit-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .fruit-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateX(5px);
+        }
+
+        .fruit-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+        }
+
+        .fruit-info h4 {
+            color: #90e0ef;
+            font-size: 1rem;
+            margin-bottom: 3px;
+        }
+
+        .fruit-info p {
+            font-size: 0.85rem;
+            color: #caf0f8;
+        }
+
+        .instructions {
+            margin-top: 25px;
+            padding: 20px;
+            background: rgba(0, 180, 216, 0.1);
+            border-radius: 10px;
+            border-left: 5px solid #00b4d8;
+        }
+
+        .instructions h3 {
+            color: #90e0ef;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .instructions ul {
+            padding-left: 20px;
+            color: #caf0f8;
+            line-height: 1.6;
+        }
+
+        .instructions li {
+            margin-bottom: 8px;
+        }
+
+        .mobile-controls {
+            display: none;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(2, 1fr);
+            gap: 10px;
+            margin-top: 20px;
+            width: 250px;
+        }
+
+        .mobile-btn {
+            background: rgba(0, 180, 216, 0.7);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-size: 1.5rem;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .mobile-btn.up {
+            grid-column: 2;
+            grid-row: 1;
+        }
+
+        .mobile-btn.left {
+            grid-column: 1;
+            grid-row: 2;
+        }
+
+        .mobile-btn.right {
+            grid-column: 3;
+            grid-row: 2;
+        }
+
+        .mobile-btn.down {
+            grid-column: 2;
+            grid-row: 3;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #0f4c75;
+            color: #90e0ef;
+            font-size: 0.9rem;
+            width: 100%;
+        }
+
+        .github-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: #90e0ef;
+            text-decoration: none;
+            margin-top: 10px;
+            padding: 8px 16px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 5px;
+            transition: all 0.3s ease;
+        }
+
+        .github-link:hover {
+            background: rgba(0, 180, 216, 0.2);
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 900px) {
+            .game-container {
+                flex-direction: column;
+            }
+            
+            .left-panel, .game-board {
+                min-width: 100%;
+            }
+            
+            #gameCanvas {
+                width: 100%;
+                height: auto;
+            }
+            
+            .mobile-controls {
+                display: grid;
+            }
+        }
+
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 2.5rem;
+            }
+            
+            .stats-container {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .controls {
+                flex-wrap: wrap;
+            }
+            
+            button {
+                flex: 1;
+                min-width: 120px;
+            }
+        }
+
+        .pulse {
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+
+        .highlight {
+            background-color: rgba(0, 180, 216, 0.2);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-brain"></i> MindSnake</h1>
+            <p class="tagline">Соберите фрукты самоосознания. Избегайте стен внутренних ограничений.</p>
+        </header>
+        
+        <div class="game-container">
+            <div class="left-panel">
+                <div class="psychology-container">
+                    <h3 class="psychology-title"><i class="fas fa-comment-dots"></i> Психологическая подсказка</h3>
+                    <div id="psychologyMessage">
+                        Добро пожаловать в MindSnake! Здесь каждый фрукт — это метафора. Собирая их, вы не просто увеличиваете счёт, а исследуете своё сознание. Прямо как в жизни: иногда мы движемся на автомате, пока не столкнёмся с препятствием...
+                    </div>
+                </div>
+                
+                <div class="humor-box">
+                    <h3 class="humor-title"><i class="fas fa-grin-squint-tears"></i> Юмор от змейки</h3>
+                    <div id="humorMessage">
+                        Привет! Я — ваша цифровая рептилия. Моя жизнь состоит из поедания фруктов и избегания стен. Напоминает ваш понедельник, не так ли?
+                    </div>
+                </div>
+                
+                <div class="fruit-types">
+                    <div class="fruit-item">
+                        <div class="fruit-color" style="background-color: #ef476f;"></div>
+                        <div class="fruit-info">
+                            <h4>Яблоко Самооценки</h4>
+                            <p>+10 очков, +1 к уверенности</p>
+                        </div>
+                    </div>
+                    <div class="fruit-item">
+                        <div class="fruit-color" style="background-color: #ffd166;"></div>
+                        <div class="fruit-info">
+                            <h4>Банан Оптимизма</h4>
+                            <p>+15 очков, +1 к скорости</p>
+                        </div>
+                    </div>
+                    <div class="fruit-item">
+                        <div class="fruit-color" style="background-color: #06d6a0;"></div>
+                        <div class="fruit-info">
+                            <h4>Киви Осознанности</h4>
+                            <p>+20 очков, замедляет время</p>
+                        </div>
+                    </div>
+                    <div class="fruit-item">
+                        <div class="fruit-color" style="background-color: #118ab2;"></div>
+                        <div class="fruit-info">
+                            <h4>Виноград Рефлексии</h4>
+                            <p>+25 очков, показывает скрытые пути</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="instructions">
+                    <h3><i class="fas fa-info-circle"></i> Как играть</h3>
+                    <ul>
+                        <li>Используйте <span class="highlight">стрелки</span> на клавиатуре для управления</li>
+                        <li>Собирайте разноцветные фрукты для получения очков и бонусов</li>
+                        <li>Избегайте стен и не кусайте себя за хвост</li>
+                        <li>Каждый фрукт дает не только очки, но и психологическую подсказку</li>
+                        <li>Чем дольше вы играете, тем интереснее становятся сообщения</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="game-board">
+                <div class="stats-container">
+                    <div class="stat-box">
+                        <div class="stat-value" id="score">0</div>
+                        <div class="stat-label">Очки осознания</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-value" id="level">1</div>
+                        <div class="stat-label">Уровень развития</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-value" id="length">3</div>
+                        <div class="stat-label">Длина осознания</div>
+                    </div>
+                </div>
+                
+                <canvas id="gameCanvas" width="500" height="500"></canvas>
+                
+                <div class="controls">
+                    <button id="startBtn"><i class="fas fa-play"></i> Начать игру</button>
+                    <button id="pauseBtn"><i class="fas fa-pause"></i> Пауза</button>
+                    <button id="resetBtn"><i class="fas fa-redo"></i> Новая игра</button>
+                </div>
+                
+                <div class="mobile-controls">
+                    <button class="mobile-btn up"><i class="fas fa-arrow-up"></i></button>
+                    <button class="mobile-btn left"><i class="fas fa-arrow-left"></i></button>
+                    <button class="mobile-btn right"><i class="fas fa-arrow-right"></i></button>
+                    <button class="mobile-btn down"><i class="fas fa-arrow-down"></i></button>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <p>MindSnake © 2023 - Исследуйте сознание, один пиксель за раз</p>
+            <p>Психологическая "Змейка" с элементами юмора и саморефлексии</p>
+            <a href="https://github.com/yourusername/mindsnake" class="github-link" target="_blank">
+                <i class="fab fa-github"></i> Исходный код на GitHub
+            </a>
+        </footer>
+    </div>
+
+    <script>
+        // Игровые переменные
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const scoreElement = document.getElementById('score');
+        const levelElement = document.getElementById('level');
+        const lengthElement = document.getElementById('length');
+        const psychologyMessage = document.getElementById('psychologyMessage');
+        const humorMessage = document.getElementById('humorMessage');
+        
+        // Психологические сообщения
+        const psychologyMessages = [
+            "Интересно, что вы сейчас чувствуете, управляя цифровой змейкой? Некоторая тревога от приближения к стенам? Это нормально — наш мозг реагирует на цифровые угрозы почти как на реальные.",
+            "С каждым съеденным фруктом вы не просто набираете очки. Вы практикуете принцип 'маленьких шагов' — основу любых изменений в жизни.",
+            "Заметили, как автоматически двигаете змейку? Так и в жизни: многие действия мы совершаем 'на автопилоте'. Осознанность — это выход из этого режима.",
+            "Столкновение со стеной в игре — это не провал. Это обратная связь. В психологии мы называем это 'корректирующий опыт'.",
+            "Чем длиннее становится змейка, тем сложнее ей управлять. Прямо как с жизненными обязательствами: важно не количество, а умение маневрировать.",
+            "Вы пытаетесь предугадать, где появится следующий фрукт? Это проявление нашей врожденной потребности в контроле и предсказуемости.",
+            "Иногда самый короткий путь к фрукту — не самый безопасный. В жизни тоже: прямота не всегда эффективна, иногда нужна обходная стратегия.",
+            "Ваша змейка стала длиннее! Напоминает, как растут наши навыки: постепенно, через повторяющиеся действия и 'поедание' новых знаний."
+        ];
+        
+        // Юмористические сообщения
+        const humorMessages = [
+            "Мой терапевт говорит, что я слишком зациклен на еде. Но что он понимает? Он даже не пиксельный!",
+            "Иногда я думаю, что стены — это просто проекция моих внутренних ограничений. Ну или плохое программирование.",
+            "Вы когда-нибудь задумывались, почему фрукты всегда появляются в самых неудобных местах? Это как с задачами по дому!",
+            "Если бы у меня был выбор, я бы предпочел быть питоном. У них хотя бы есть ноги. Ну, лапы. Ну, в общем, они не такие плоские.",
+            "Знаете, какое мое любимое блюдо? Яблоки самооценки. От них не толстеешь, а уверенность растет!",
+            "Иногда я кусаю себя за хвост. Мой психолог называет это 'саморазрушающим поведением'. Я называю это 'понедельником'.",
+            "Вы играете, чтобы расслабиться? Ирония в том, что от вашего стресса зависит моя виртуальная жизнь. Давление, однако!",
+            "Если бы у меня был рубль за каждый раз, когда игрок врезался в стену... Я бы купил себе виртуальную ферму фруктов."
+        ];
+        
+        // Типы фруктов с их свойствами
+        const fruitTypes = [
+            {color: '#ef476f', points: 10, name: 'Яблоко Самооценки', message: 'Помните: ваша ценность не зависит от достижений. Но +10 очков всё равно приятно!'},
+            {color: '#ffd166', points: 15, name: 'Банан Оптимизма', message: 'Оптимизм — это когда вместо "половина пуста" видишь "половина полна... бананов". +15 очков!'},
+            {color: '#06d6a0', points: 20, name: 'Киви Осознанности', message: 'Осознанность — это когда ешь киви и замечаешь все 1500 семечек. +20 очков!'},
+            {color: '#118ab2', points: 25, name: 'Виноград Рефлексии', message: 'Рефлексия — как виноград: иногда кислая, но в целом полезна для ума. +25 очков!'},
+            {color: '#9d4edd', points: 30, name: 'Слива Перфекционизма', message: 'Перфекционизм — это когда пытаешься собрать все фрукты идеальным зигзагом. Расслабьтесь, +30 очков!'}
+        ];
+        
+        // Игровые параметры
+        const gridSize = 20;
+        let snake = [];
+        let food = {};
+        let direction = 'right';
+        let nextDirection = 'right';
+        let score = 0;
+        let level = 1;
+        let gameSpeed = 150;
+        let gameLoop;
+        let isPaused = false;
+        let isGameOver = false;
+        
+        // Инициализация игры
+        function initGame() {
+            // Создаем змейку
+            snake = [
+                {x: 10, y: 10},
+                {x: 9, y: 10},
+                {x: 8, y: 10}
+            ];
+            
+            // Создаем первую еду
+            generateFood();
+            
+            // Сброс значений
+            score = 0;
+            level = 1;
+            gameSpeed = 150;
+            direction = 'right';
+            nextDirection = 'right';
+            isGameOver = false;
+            
+            // Обновление интерфейса
+            updateScore();
+            updatePsychologyMessage(0);
+            updateHumorMessage(0);
+            
+            // Отрисовка начального состояния
+            draw();
+        }
+        
+        // Генерация еды
+        function generateFood() {
+            const foodType = fruitTypes[Math.floor(Math.random() * fruitTypes.length)];
+            
+            // Генерация случайных координат
+            let foodOnSnake;
+            do {
+                foodOnSnake = false;
+                food = {
+                    x: Math.floor(Math.random() * (canvas.width / gridSize)),
+                    y: Math.floor(Math.random() * (canvas.height / gridSize)),
+                    type: foodType
+                };
+                
+                // Проверка, не находится ли еда на змейке
+                for (let segment of snake) {
+                    if (segment.x === food.x && segment.y === food.y) {
+                        foodOnSnake = true;
+                        break;
+                    }
+                }
+            } while (foodOnSnake);
+        }
+        
+        // Отрисовка игры
+        function draw() {
+            // Очистка холста
+            ctx.fillStyle = '#0d1b2a';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Отрисовка сетки (фон)
+            ctx.strokeStyle = 'rgba(15, 76, 117, 0.2)';
+            ctx.lineWidth = 0.5;
+            for (let x = 0; x < canvas.width; x += gridSize) {
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, canvas.height);
+                ctx.stroke();
+            }
+            for (let y = 0; y < canvas.height; y += gridSize) {
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(canvas.width, y);
+                ctx.stroke();
+            }
+            
+            // Отрисовка змейки
+            snake.forEach((segment, index) => {
+                // Голова змейки
+                if (index === 0) {
+                    ctx.fillStyle = '#00b4d8';
+                    ctx.fillRect(segment.x * gridSize, segment.y * gridSize, gridSize, gridSize);
+                    
+                    // Глаза
+                    ctx.fillStyle = '#ffffff';
+                    let eyeX1, eyeY1, eyeX2, eyeY2;
+                    
+                    if (direction === 'right') {
+                        eyeX1 = segment.x * gridSize + gridSize - 6;
+                        eyeY1 = segment.y * gridSize + 5;
+                        eyeX2 = segment.x * gridSize + gridSize - 6;
+                        eyeY2 = segment.y * gridSize + gridSize - 5;
+                    } else if (direction === 'left') {
+                        eyeX1 = segment.x * gridSize + 6;
+                        eyeY1 = segment.y * gridSize + 5;
+                        eyeX2 = segment.x * gridSize + 6;
+                        eyeY2 = segment.y * gridSize + gridSize - 5;
+                    } else if (direction === 'up') {
+                        eyeX1 = segment.x * gridSize + 5;
+                        eyeY1 = segment.y * gridSize + 6;
+                        eyeX2 = segment.x * gridSize + gridSize - 5;
+                        eyeY2 = segment.y * gridSize + 6;
+                    } else { // down
+                        eyeX1 = segment.x * gridSize + 5;
+                        eyeY1 = segment.y * gridSize + gridSize - 6;
+                        eyeX2 = segment.x * gridSize + gridSize - 5;
+                        eyeY2 = segment.y * gridSize + gridSize - 6;
+                    }
+                    
+                    ctx.beginPath();
+                    ctx.arc(eyeX1, eyeY1, 3, 0, Math.PI * 2);
+                    ctx.arc(eyeX2, eyeY2, 3, 0, Math.PI * 2);
+                    ctx.fill();
+                } 
+                // Тело змейки
+                else {
+                    // Градиентное тело
+                    const gradient = ctx.createLinearGradient(
+                        segment.x * gridSize, 
+                        segment.y * gridSize, 
+                        segment.x * gridSize + gridSize, 
+                        segment.y * gridSize + gridSize
+                    );
+                    gradient.addColorStop(0, '#0077b6');
+                    gradient.addColorStop(1, '#0096c7');
+                    
+                    ctx.fillStyle = gradient;
+                    ctx.fillRect(segment.x * gridSize, segment.y * gridSize, gridSize, gridSize);
+                    
+                    // Легкая обводка для сегментов
+                    ctx.strokeStyle = '#90e0ef';
+                    ctx.lineWidth = 1;
+                    ctx.strokeRect(segment.x * gridSize, segment.y * gridSize, gridSize, gridSize);
+                }
+            });
+            
+            // Отрисовка еды
+            ctx.fillStyle = food.type.color;
+            ctx.beginPath();
+            ctx.arc(
+                food.x * gridSize + gridSize / 2,
+                food.y * gridSize + gridSize / 2,
+                gridSize / 2 - 2,
+                0,
+                Math.PI * 2
+            );
+            ctx.fill();
+            
+            // Эффект свечения для еды
+            ctx.shadowColor = food.type.color;
+            ctx.shadowBlur = 15;
+            ctx.fill();
+            ctx.shadowBlur = 0;
+            
+            // Отрисовка текста на еде (первая буква)
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 12px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(
+                food.type.name.charAt(0),
+                food.x * gridSize + gridSize / 2,
+                food.y * gridSize + gridSize / 2
+            );
+            
+            // Если игра окончена, показываем сообщение
+            if (isGameOver) {
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                ctx.fillStyle = '#ef476f';
+                ctx.font = 'bold 40px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText('ИГРА ОКОНЧЕНА', canvas.width / 2, canvas.height / 2 - 40);
+                
+                ctx.fillStyle = '#ffffff';
+                ctx.font = '24px Arial';
+                ctx.fillText(`Счёт: ${score}`, canvas.width / 2, canvas.height / 2 + 10);
+                ctx.fillText(`Уровень: ${level}`, canvas.width / 2, canvas.height / 2 + 50);
+                
+                ctx.fillStyle = '#90e0ef';
+                ctx.font = '18px Arial';
+                ctx.fillText('Нажмите "Новая игра" для продолжения', canvas.width / 2, canvas.height / 2 + 100);
+            }
+            
+            // Если игра на паузе
+            if (isPaused && !isGameOver) {
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                ctx.fillStyle = '#ffd166';
+                ctx.font = 'bold 40px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText('ПАУЗА', canvas.width / 2, canvas.height / 2);
+                
+                ctx.fillStyle = '#ffffff';
+                ctx.font = '18px Arial';
+                ctx.fillText('Нажмите "Пауза" для продолжения', canvas.width / 2, canvas.height / 2 + 50);
+            }
+        }
+        
+        // Обновление игры
+        function update() {
+            if (isPaused || isGameOver) return;
+            
+            // Обновление направления
+            direction = nextDirection;
+            
+            // Создание новой головы
+            const head = {...snake[0]};
+            
+            // Движение головы в зависимости от направления
+            switch(direction) {
+                case 'up': head.y--; break;
+                case 'down': head.y++; break;
+                case 'left': head.x--; break;
+                case 'right': head.x++; break;
+            }
+            
+            // Проверка столкновения со стенами
+            if (
+                head.x < 0 || 
+                head.x >= canvas.width / gridSize || 
+                head.y < 0 || 
+                head.y >= canvas.height / gridSize
+            ) {
+                gameOver();
+                return;
+            }
+            
+            // Проверка столкновения с собой
+            for (let segment of snake) {
+                if (head.x === segment.x && head.y === segment.y) {
+                    gameOver();
+                    return;
+                }
+            }
+            
+            // Добавление новой головы
+            snake.unshift(head);
+            
+            // Проверка, съела ли змейка еду
+            if (head.x === food.x && head.y === food.y) {
+                // Увеличение счета
+                score += food.type.points;
+                
+                // Обновление психологического и юмористического сообщений
+                updatePsychologyMessage(score);
+                updateHumorMessage(score);
+                
+                // Проверка перехода на новый уровень
+                if (score >= level * 100) {
+                    level++;
+                    gameSpeed = Math.max(50, gameSpeed - 10); // Увеличение скорости
+                    
+                    // Обновление интерфейса
+                    levelElement.textContent = level;
+                    
+                    // Сообщение о новом уровне
+                    psychologyMessage.innerHTML = `<span class="pulse">Поздравляем! Вы достигли уровня ${level}. Ваша осознанность растёт! Помните: развитие — это не линейный процесс, а серия скачков.</span>`;
+                }
+                
+                // Обновление счета
+                updateScore();
+                
+                // Генерация новой еды
+                generateFood();
+            } else {
+                // Удаление хвоста, если еда не съедена
+                snake.pop();
+            }
+            
+            // Отрисовка обновленного состояния
+            draw();
+        }
+        
+        // Конец игры
+        function gameOver() {
+            isGameOver = true;
+            clearInterval(gameLoop);
+            
+            // Финальное психологическое сообщение
+            const finalPsychologyMessage = [
+                `Игра окончена. Ваш счёт: ${score}. Помните: в жизни, как и в игре, важны не только достижения, но и сам процесс. Каждое столкновение — это возможность научиться чему-то новому.`,
+                `Вы набрали ${score} очков осознания. В психологии есть концепция 'принятия': иногда нужно признать конец одной игры, чтобы начать другую. Или перезапустить эту!`,
+                `Уровень ${level} завершён. Каждая игра — это метафора: мы ставим цели (фрукты), преодолеваем препятствия (стены) и иногда сталкиваемся с самими собой. Главное — продолжать играть.`
+            ];
+            
+            psychologyMessage.innerHTML = `<span class="highlight">${finalPsychologyMessage[Math.floor(Math.random() * finalPsychologyMessage.length)]}</span>`;
+            
+            // Финальное юмористическое сообщение
+            humorMessage.innerHTML = `Ну вот. Снова стена. Я начинаю думать, что у нас с вами проблемы с границами. Но не переживайте — даже у лучших игроков бывают плохие дни. Нажмите "Новая игра" и давайте попробуем снова!`;
+            
+            draw();
+        }
+        
+        // Обновление счета
+        function updateScore() {
+            scoreElement.textContent = score;
+            lengthElement.textContent = snake.length;
+        }
+        
+        // Обновление психологического сообщения
+        function updatePsychologyMessage(currentScore) {
+            const messageIndex = Math.min(
+                Math.floor(currentScore / 50), 
+                psychologyMessages.length - 1
+            );
+            psychologyMessage.innerHTML = psychologyMessages[messageIndex];
+            
+            // Добавляем информацию о фрукте
+            psychologyMessage.innerHTML += `<br><br><i>${food.type.message}</i>`;
+        }
+        
+        // Обновление юмористического сообщения
+        function updateHumorMessage(currentScore) {
+            const messageIndex = Math.min(
+                Math.floor(currentScore / 40), 
+                humorMessages.length - 1
+            );
+            humorMessage.innerHTML = humorMessages[messageIndex];
+        }
+        
+        // Управление с клавиатуры
+        document.addEventListener('keydown', (event) => {
+            switch(event.key) {
+                case 'ArrowUp':
+                    if (direction !== 'down') nextDirection = 'up';
+                    event.preventDefault();
+                    break;
+                case 'ArrowDown':
+                    if (direction !== 'up') nextDirection = 'down';
+                    event.preventDefault();
+                    break;
+                case 'ArrowLeft':
+                    if (direction !== 'right') nextDirection = 'left';
+                    event.preventDefault();
+                    break;
+                case 'ArrowRight':
+                    if (direction !== 'left') nextDirection = 'right';
+                    event.preventDefault();
+                    break;
+                case ' ':
+                    togglePause();
+                    event.preventDefault();
+                    break;
+            }
+        });
+        
+        // Управление с мобильных кнопок
+        document.querySelectorAll('.mobile-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const direction = this.classList.contains('up') ? 'up' :
+                                this.classList.contains('down') ? 'down' :
+                                this.classList.contains('left') ? 'left' : 'right';
+                
+                if ((direction === 'up' && this.direction !== 'down') ||
+                    (direction === 'down' && this.direction !== 'up') ||
+                    (direction === 'left' && this.direction !== 'right') ||
+                    (direction === 'right' && this.direction !== 'left')) {
+                    nextDirection = direction;
+                }
+            });
+        });
+        
+        // Запуск игры
+        function startGame() {
+            if (gameLoop) clearInterval(gameLoop);
+            
+            if (isGameOver) {
+                initGame();
+            }
+            
+            isPaused = false;
+            document.getElementById('pauseBtn').innerHTML = '<i class="fas fa-pause"></i> Пауза';
+            
+            gameLoop = setInterval(update, gameSpeed);
+        }
+        
+        // Пауза игры
+        function togglePause() {
+            if (isGameOver) return;
+            
+            isPaused = !isPaused;
+            
+            if (isPaused) {
+                clearInterval(gameLoop);
+                document.getElementById('pauseBtn').innerHTML = '<i class="fas fa-play"></i> Продолжить';
+            } else {
+                gameLoop = setInterval(update, gameSpeed);
+                document.getElementById('pauseBtn').innerHTML = '<i class="fas fa-pause"></i> Пауза';
+            }
+            
+            draw();
+        }
+        
+        // Сброс игры
+        function resetGame() {
+            clearInterval(gameLoop);
+            initGame();
+            isPaused = false;
+            document.getElementById('pauseBtn').innerHTML = '<i class="fas fa-pause"></i> Пауза';
+            gameLoop = setInterval(update, gameSpeed);
+        }
+        
+        // Инициализация при загрузке страницы
+        window.onload = function() {
+            initGame();
+            
+            // Назначение обработчиков кнопок
+            document.getElementById('startBtn').addEventListener('click', startGame);
+            document.getElementById('pauseBtn').addEventListener('click', togglePause);
+            document.getElementById('resetBtn').addEventListener('click', resetGame);
+            
+            // Автозапуск игры через 2 секунды
+            setTimeout(() => {
+                startGame();
+            }, 2000);
+        };
+    </script>
+</body>
+</html>
